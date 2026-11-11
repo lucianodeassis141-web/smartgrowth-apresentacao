@@ -226,6 +226,17 @@
     }, 90);
   }
 
+  // subindo a partir de Serviços: mesma luz, e a página volta para o símbolo aceso, antes do flash
+  function voltarParaPalco() {
+    estadoVeu = 'saltando'; veu.classList.remove('some'); veu.style.opacity = '1'; ultimoVeu = 1;
+    var alvoY = Math.round(chegada + (palcoFim - chegada) * 0.72);
+    window.scrollTo({ top: alvoY, behavior: 'instant' });
+    yS = alvoY; sujo = true;
+    setTimeout(function () {
+      veu.classList.add('some'); veu.style.opacity = '0'; ultimoVeu = 0; estadoVeu = 'livre';
+    }, 90);
+  }
+
   var ultimoY = -1, ultimoTexto = -1, escondido = false, yS = -1, tAnt = 0, pronto = false;
 
   function quadro(agora) {
@@ -248,13 +259,15 @@
     var explode = faixa(g, 0.18, 0.36) * (1 - faixa(g, 0.48, 0.64)); // peças se afastam e voltam
     var bordas = faixa(g, 0.62, 0.74) * (1 - faixa(g, 0.9, 0.97));  // bordas acendem
     var acende = faixa(g, 0.72, 0.86);                               // frente esquenta
-    var flash = faixa(g, 0.8, 0.92);                                 // estouro de luz saindo do centro
+    var flash = descendo ? faixa(g, 0.8, 0.92) : 0;                  // estouro de luz (só descendo)
     var passou = camada ? 0 : Math.max(0, y - palcoFim);
 
     // flash: a tela fica clara e a página pula para Serviços por trás da luz (como a RZD)
     var gReal = (y - chegada) / (palcoFim - chegada);
-    if (estadoVeu === 'livre') {
-      var vo = faixa(g, 0.86, 0.95);
+    var subindoNoFim = !descendo && servicos && !reduz && gReal > 0.76 && y < servTopo - 2;
+    if (estadoVeu !== 'saltando' && subindoNoFim) voltarParaPalco();
+    else if (estadoVeu === 'livre') {
+      var vo = descendo ? faixa(g, 0.86, 0.95) : 0;
       if (Math.abs(vo - ultimoVeu) > 0.01) { veu.style.opacity = vo.toFixed(3); ultimoVeu = vo; }
       if (servicos && !reduz && descendo && gReal >= 0.95 && y < servTopo - 2) pularParaServicos();
     } else if (estadoVeu === 'sumindo' && y < chegada + (palcoFim - chegada) * 0.8) {

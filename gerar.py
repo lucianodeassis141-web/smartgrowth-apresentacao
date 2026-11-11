@@ -501,6 +501,7 @@ def previa(slug):
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
 body {{ background: var(--bg); color: var(--fg); font: 400 16px/1.55 "Figtree", system-ui, sans-serif; overflow-x: hidden; }}
 .t {{ font-family: {fonte_t}; font-weight: {peso_t}; text-transform: {caixa}; line-height: 1; letter-spacing: -.005em; }}
+::selection {{ background: var(--ac); color: var(--acfg); }}
 button {{ font: 700 .85rem "Figtree", sans-serif; border: 0; cursor: pointer; background: var(--ac); color: var(--acfg); padding: 12px 18px; border-radius: 999px; }}
 .faixa {{ background: #0B0D14; color: #FF9A3D; font: 800 .68rem "Figtree", sans-serif; letter-spacing: .14em; text-transform: uppercase; text-align: center; padding: 7px 16px; }}
 .faixa a {{ color: #F3F4F8; text-decoration: underline; }}
