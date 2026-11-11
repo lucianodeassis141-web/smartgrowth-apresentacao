@@ -3,7 +3,9 @@
 Pedido do Luciano em 11/11/2026: o site da RZD group (rzdgroup.com.br) adaptado para a SG, só para apresentar.
 Mesma estrutura, mas com a identidade da SG (laranja, símbolo SG) e textos nossos, sem copiar os da RZD.
 
-**No ar (11/11/2026, pedido do Luciano):** https://lucianodeassis141-web.github.io/smartgrowth-apresentacao/ (GitHub Pages, repositório público `lucianodeassis141-web/smartgrowth-apresentacao`, ramo main). O site oficial continua em `site-novo/` (smartgrowthai.com.br). Todas as páginas levam `noindex`.
+**Site oficial da SG desde 11/11/2026 (pedido do Luciano: "substituir o site oficial"):** https://smartgrowthai.com.br, na Hostinger. Para publicar lá: `python gerar.py`, `python montar_lotes_hostinger.py` e rodar os lotes `sg-lote*.js` com a aba do File Browser da Hostinger na frente (perfil chrome-smart-growth); o index.html vai por último. O site antigo está em `../site-novo/` (git).
+As 8 prévias de marcas famosas levam noindex; início, Profissionais, Negócios e Privacidade entram no Google (sitemap). Aviso de cookies e GA4 (G-K83D5QED08) só depois do Aceitar.
+**Cópia no GitHub Pages:** https://lucianodeassis141-web.github.io/smartgrowth-apresentacao/ (GitHub Pages, repositório público `lucianodeassis141-web/smartgrowth-apresentacao`, ramo main). O site oficial continua em `site-novo/` (smartgrowthai.com.br). Todas as páginas levam `noindex`.
 Para atualizar: `python gerar.py`, depois `git add -A && git commit -m ... && git push` nesta pasta.
 
 ## O que tem

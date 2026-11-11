@@ -1,0 +1,61 @@
+# Smart Growth · smartgrowthai.com.br (11/11/2026)
+Options -Indexes
+DirectoryIndex index.html
+AddDefaultCharset UTF-8
+AddType text/plain .txt
+AddType application/manifest+json .webmanifest
+AddType image/x-icon .ico
+
+RewriteEngine On
+# http vai para https
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# www vai para o endereço sem www
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+# /index.html vai para a raiz (uma URL só no Google)
+RewriteCond %{THE_REQUEST} \s/index\.html[\s?] [NC]
+RewriteRule ^index\.html$ / [R=301,L]
+# arquivos escondidos (.git, .env, .htaccess) dão 403; o .well-known continua aberto
+RewriteRule (^|/)\.(?!well-known/) - [F]
+
+# páginas de erro próprias
+ErrorDocument 403 /403.html
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
+ErrorDocument 503 /503.html
+
+# modo manutenção (503; não deixar mais de 1 ou 2 dias)
+# ligar: tirar o # das 2 linhas abaixo. Desligar: pôr o # de volta e limpar o cache da CDN no hPanel.
+#RewriteCond %{REQUEST_URI} !^/(503\.html|assets/|favicon\.(ico|svg)|robots\.txt)
+#RewriteRule ^ - [R=503,L]
+
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+  Header always set Content-Security-Policy "object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; upgrade-insecure-requests"
+  # erro de servidor e manutenção nunca ficam no cache (a Hostinger ignora o -in; uma linha por código)
+  Header always set Cache-Control "no-store" "expr=%{REQUEST_STATUS} == 500"
+  Header always set Cache-Control "no-store" "expr=%{REQUEST_STATUS} == 503"
+  Header always set Retry-After "3600" "expr=%{REQUEST_STATUS} == 503"
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript text/javascript application/json application/manifest+json image/svg+xml text/plain application/xml text/xml
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType image/x-icon "access plus 30 days"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType text/javascript "access plus 7 days"
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>

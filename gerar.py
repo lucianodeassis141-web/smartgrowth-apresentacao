@@ -12,6 +12,7 @@ def v(arq):
 # Número do WhatsApp da SG, só dígitos com 55 e DDD (ex.: "5537999999999").
 WHATSAPP = ""
 INSTAGRAM = "https://instagram.com/smartgrowthai"
+DOMINIO = "https://smartgrowthai.com.br"
 def contato_url(msg="Olá! Vi o site da Smart Growth e quero conversar."):
     from urllib.parse import quote
     # Sem número, o wa.me abre o WhatsApp com a mensagem pronta para escolher o contato.
@@ -151,7 +152,7 @@ COM = ["A sua empresa aparece no Google e nas IAs quando procuram o que você ve
        "A sua marca é lembrada em todo lugar que o cliente encontra você"]
 
 # ---------------- peças ----------------
-def cabeca(titulo, desc, raiz):
+def cabeca(titulo, desc, raiz, caminho="/"):
     return f'''<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -159,9 +160,26 @@ def cabeca(titulo, desc, raiz):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{e(titulo)}</title>
 <meta name="description" content="{e(desc)}">
-<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="{DOMINIO}{caminho}">
 <meta name="theme-color" content="#0B0D14">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Smart Growth">
+<meta property="og:title" content="{e(titulo)}">
+<meta property="og:description" content="{e(desc)}">
+<meta property="og:url" content="{DOMINIO}{caminho}">
+<meta property="og:image" content="{DOMINIO}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{e(titulo)}">
+<meta name="twitter:description" content="{e(desc)}">
+<meta name="twitter:image" content="{DOMINIO}/og.png">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="{raiz}assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<script type="application/ld+json">{{"@context":"https://schema.org","@type":"ProfessionalService","name":"Smart Growth","url":"{DOMINIO}/","logo":"{DOMINIO}/icon-512.png","image":"{DOMINIO}/og.png","slogan":"Inteligência que impulsiona resultados.","description":"Sites, sistemas sob medida, automações, robô no WhatsApp, identidade visual, tráfego pago, SEO e GEO.","areaServed":"BR","sameAs":["{INSTAGRAM}"]}}</script>
 <link rel="preload" href="{raiz}assets/Anton.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{raiz}assets/sg.css?v={v("sg.css")}">
 </head>
@@ -373,12 +391,13 @@ def rodape(raiz):
     <a class="bt bt-marca" data-revelar href="{contato_url()}" target="_blank" rel="noopener">{ic("conversa")}{CONTATO_ROTULO}</a>
     <footer class="rodape">
       <img src="{raiz}assets/sg-horizontal-sem-slogan-negativo.svg" alt="Smart Growth" width="170" height="20">
-      <div class="itens"><span>© 2026 Smart Growth</span><span>·</span><a href="{INSTAGRAM}" target="_blank" rel="noopener">@smartgrowthai</a><span>·</span><span>Marcas citadas nos conceitos pertencem aos seus donos</span></div>
+      <div class="itens"><span>© 2026 Smart Growth</span><span>·</span><a href="{INSTAGRAM}" target="_blank" rel="noopener">@smartgrowthai</a><span>·</span><a href="{raiz}privacidade/">Privacidade</a><span>·</span><a href="#" data-cookies>Cookies</a><span>·</span><span>Marcas citadas nos conceitos pertencem aos seus donos</span></div>
     </footer>
   </div>
 </section>
 <a class="flutua-zap" href="{contato_url()}" target="_blank" rel="noopener" aria-label="{CONTATO_ROTULO}">{ZAP}</a>
 <script src="{raiz}assets/sg.js?v={v("sg.js")}" defer></script>
+<script src="{raiz}assets/cookies.js?v={v("cookies.js")}" defer></script>
 '''
 
 # ---------------- páginas ----------------
@@ -430,7 +449,7 @@ def pagina_publico(chave):
         serv, s_tit, s_int = NEG_SERV, titulo_m("Da vitrine ao pedido,", "tudo ligado."), "Montamos só o que faz sentido para o seu negócio. Você fala direto com a gente do começo ao fim."
         casos = ["nike","natura","havaianas"]; c_tit = titulo_m("Negócios,", "em conceito."); c_int = "Uma loja, uma revenda e uma fábrica, cada uma com o que o negócio pedia."
         mods = ["adidas","cocacola","havaianas","nike"]
-    h = cabeca(t, d, r) + topo(r, chave)
+    h = cabeca(t, d, r, "/" + chave + "/") + topo(r, chave)
     cards = "".join(f'''<article class="cartao" data-revelar style="--atraso:{(i%3)*0.07}s"><div class="cab"><span class="ic">{ic(a)}</span></div><h3>{e(b)}</h3><p>{e(c)}</p></article>''' for i, (a, b, c) in enumerate(serv))
     h += f'''<main>
 <section id="inicio" class="pub-topo escura">

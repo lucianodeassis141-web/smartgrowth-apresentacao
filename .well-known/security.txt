@@ -1,0 +1,5 @@
+Contact: https://smartgrowthai.com.br/#contato
+Contact: https://instagram.com/smartgrowthai
+Expires: 2027-11-11T00:00:00.000Z
+Preferred-Languages: pt, en
+Canonical: https://smartgrowthai.com.br/.well-known/security.txt
