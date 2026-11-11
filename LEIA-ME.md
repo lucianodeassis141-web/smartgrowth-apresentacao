@@ -3,7 +3,8 @@
 Pedido do Luciano em 11/11/2026: o site da RZD group (rzdgroup.com.br) adaptado para a SG, só para apresentar.
 Mesma estrutura, mas com a identidade da SG (laranja, símbolo SG) e textos nossos, sem copiar os da RZD.
 
-**Não está publicado.** O site oficial continua em `site-novo/` (smartgrowthai.com.br). Todas as páginas levam `noindex`.
+**No ar (11/11/2026, pedido do Luciano):** https://lucianodeassis141-web.github.io/smartgrowth-apresentacao/ (GitHub Pages, repositório público `lucianodeassis141-web/smartgrowth-apresentacao`, ramo main). O site oficial continua em `site-novo/` (smartgrowthai.com.br). Todas as páginas levam `noindex`.
+Para atualizar: `python gerar.py`, depois `git add -A && git commit -m ... && git push` nesta pasta.
 
 ## O que tem
 - `index.html`: topo com o **símbolo SG em 3D** (three.js). Ele desce do alto e acende como lâmpada quando a página abre. Ao rolar, vai para o meio da tela, gira, cresce e brilha em laranja (efeito do "R" da RZD). Sem WebGL, aparece o símbolo parado.
