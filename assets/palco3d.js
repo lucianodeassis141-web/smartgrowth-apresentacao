@@ -13,6 +13,7 @@
   var brilhoDom = document.querySelector('.palco3d-brilho');
   var texto = document.querySelector('[data-palco-texto]');
   var servicos = document.getElementById('servicos');
+  var frase = document.querySelector('.palco .frase'), ultimaFrase = -1;
   if (!alvo || !canvas || !window.THREE) return;
 
   var reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -58,7 +59,7 @@
     else if (cmd === 'C') { var a = n(), b = n(), c = n(), d = n(), e = n(), g = n(); f.bezierCurveTo(px(a), py(b), px(c), py(d), px(e), py(g)); }
     else if (cmd === 'Z') { f.closePath(); }
   }
-  var opExt = { depth: 0.17, bevelEnabled: true, bevelThickness: 0.016, bevelSize: 0.011, bevelSegments: movel ? 2 : 4, curveSegments: movel ? 8 : 18 };
+  var opExt = { depth: 0.17, bevelEnabled: true, bevelThickness: 0.016, bevelSize: 0.011, bevelSegments: movel ? 2 : 4, curveSegments: movel ? 18 : 32 };
   var geoTudo = new T.ExtrudeGeometry(formas, opExt); geoTudo.computeBoundingBox();
   var meio = new T.Vector3(); geoTudo.boundingBox.getCenter(meio); geoTudo.dispose();
 
@@ -76,16 +77,40 @@
     painel(10, 2, new T.Color(1.6, 1.55, 1.5), [0, 9, 2]);
     painel(14, 6, new T.Color(1.4, 0.45, 0.15), [0, -2, -10]);
     var pm = new T.PMREMGenerator(renderer);
-    cena.environment = pm.fromScene(estudio, 0.035).texture;
+    cena.environment = pm.fromScene(estudio, 0.045).texture;
     pm.dispose();
     estudio.traverse(function (o) { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
   })();
   var frente = new T.MeshStandardMaterial({ color: 0xF3EEE6, metalness: 0.45, roughness: 0.24, envMapIntensity: 1.7, emissive: 0xFFE2C4, emissiveIntensity: 0 });
   var lado = new T.MeshStandardMaterial({ color: 0x1D1B19, metalness: 0.7, roughness: 0.32, envMapIntensity: 1.2, emissive: 0xFA5A14, emissiveIntensity: 1 });
+  lado.roughness = 0.4;
   var grupo = new T.Group();
+  // sombreado suave: junta as normais de faces vizinhas quase paralelas (menos de 35 graus) e mantém as quinas
+  function suavizar(geo) {
+    var pos = geo.attributes.position, nor = geo.attributes.normal, nv = pos.count;
+    var faces = new Float32Array(nv * 3), a = new T.Vector3(), b = new T.Vector3(), c = new T.Vector3();
+    for (var v = 0; v < nv; v += 3) {
+      a.fromBufferAttribute(pos, v); b.fromBufferAttribute(pos, v + 1); c.fromBufferAttribute(pos, v + 2);
+      b.sub(a); c.sub(a); b.cross(c); if (b.lengthSq() > 0) b.normalize();
+      for (var q = 0; q < 3; q++) { faces[(v + q) * 3] = b.x; faces[(v + q) * 3 + 1] = b.y; faces[(v + q) * 3 + 2] = b.z; }
+    }
+    var mapa = {}, chave = function (v) { return Math.round(pos.getX(v) * 1e4) + '_' + Math.round(pos.getY(v) * 1e4) + '_' + Math.round(pos.getZ(v) * 1e4); };
+    for (var v2 = 0; v2 < nv; v2++) { var k = chave(v2); (mapa[k] || (mapa[k] = [])).push(v2); }
+    var limite = Math.cos(35 * Math.PI / 180);
+    for (var v3 = 0; v3 < nv; v3++) {
+      var lista = mapa[chave(v3)], fx = faces[v3 * 3], fy = faces[v3 * 3 + 1], fz = faces[v3 * 3 + 2], sx = 0, sy = 0, sz = 0;
+      for (var j = 0; j < lista.length; j++) {
+        var o = lista[j], ox = faces[o * 3], oy = faces[o * 3 + 1], oz = faces[o * 3 + 2];
+        if (fx * ox + fy * oy + fz * oz >= limite) { sx += ox; sy += oy; sz += oz; }
+      }
+      var l = Math.hypot(sx, sy, sz) || 1; nor.setXYZ(v3, sx / l, sy / l, sz / l);
+    }
+    nor.needsUpdate = true;
+  }
   var pecas = formas.map(function (forma) {
     var geo = new T.ExtrudeGeometry([forma], opExt);
     geo.translate(-meio.x, -meio.y, -meio.z);
+    suavizar(geo);
     var m = new T.Mesh(geo, [frente, lado]);
     grupo.add(m);
     return m;
@@ -104,13 +129,13 @@
     cx.fillStyle = gr; cx.fillRect(0, 0, 256, 256);
     var tx = new T.CanvasTexture(tl); tx.encoding = T.sRGBEncoding; return tx;
   }
-  function sprite(tx, ordem) {
-    var s = new T.Sprite(new T.SpriteMaterial({ map: tx, transparent: true, depthWrite: false, depthTest: false, toneMapped: false, blending: T.AdditiveBlending, opacity: 0 }));
+  function sprite(tx, ordem, cobre) {
+    var s = new T.Sprite(new T.SpriteMaterial({ map: tx, transparent: true, depthWrite: false, depthTest: false, toneMapped: false, blending: cobre ? T.NormalBlending : T.AdditiveBlending, opacity: 0 }));
     s.renderOrder = ordem; cena.add(s); return s;
   }
   var halo = sprite(gradiente([[0, 'rgba(255,120,50,0.7)'], [0.3, 'rgba(255,90,31,0.22)'], [0.62, 'rgba(255,90,31,0.05)'], [1, 'rgba(255,90,31,0)']]), -1);
   halo.position.z = -0.8;
-  var clarao = sprite(gradiente([[0, 'rgba(255,250,242,1)'], [0.35, 'rgba(250,238,222,0.9)'], [0.7, 'rgba(245,200,160,0.35)'], [1, 'rgba(245,180,130,0)']]), 10);
+  var clarao = sprite(gradiente([[0, 'rgba(255,250,242,1)'], [0.45, 'rgba(250,244,236,1)'], [0.75, 'rgba(243,244,248,0.85)'], [1, 'rgba(243,244,248,0)']]), 10, true);
   clarao.position.z = 1;
 
   /* ---- medidas ---- */
@@ -209,7 +234,7 @@
     var giro = faixa(g, 0.04, 0.62);                                 // volta inteira
     var explode = faixa(g, 0.18, 0.36) * (1 - faixa(g, 0.48, 0.64)); // peças se afastam e voltam
     var acende = Math.sin(Math.PI * faixa(g, 0.6, 0.86));           // acende forte
-    var flash = faixa(g, 0.8, 0.97);                                 // clarão para a seção clara
+    var flash = faixa(g, 0.84, 0.97);                                // clarão que vira a seção clara
     var passou = camada ? 0 : Math.max(0, y - palcoFim);
 
     if ((camada ? y - palcoFim : passou) > vh * 1.4) {
@@ -257,7 +282,7 @@
     // luz: laterais acesas desde a abertura; acende forte no fim do giro
     var forca = 1 + 0.3 * faixa(g, 0.1, 0.35) + 2.4 * acende;
     lado.emissiveIntensity = luz * (0.15 + 0.85 * Math.max(0, explode) + 0.5 * Math.max(0, forca - 1));
-    frente.emissiveIntensity = luz * (0.45 * acende + 0.35 * flash);
+    frente.emissiveIntensity = luz * 0.3 * acende;
     quente.intensity = luz * (0.2 + 0.4 * t + 2.2 * acende);
     renderer.toneMappingExposure = 1.05 + 0.12 * acende;
 
@@ -266,13 +291,15 @@
     halo.scale.set(tamH, tamH, 1);
     halo.material.opacity = Math.min(1, luz * (0.45 + 0.1 * t + 0.25 * explode) + 0.45 * acende);
 
+    if (frase) { var of = (1 - flash).toFixed(2); if (of !== ultimaFrase) { frase.style.opacity = of; ultimaFrase = of; } }
     clarao.visible = flash > 0.001;
     if (clarao.visible) {
       var diag = Math.hypot(vw, vh) * ini.k;
       clarao.position.set(x, yy, 1);
-      var tc = (0.25 + flash * 2.6) * diag;
+      var tc = (0.3 + flash * 3.2) * diag;
       clarao.scale.set(tc, tc, 1);
-      clarao.material.opacity = Math.min(1, 1.6 * flash);
+      clarao.material.opacity = Math.min(1, 1.5 * flash);
+      if (!camada) clarao.position.y = centro.y;
     }
 
     renderer.render(cena, camera);

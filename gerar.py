@@ -210,7 +210,7 @@ def secao_servicos(raiz):
   <ul class="chips">{"".join(f"<li>{e(c)}</li>" for c in chips)}</ul>
   <a class="bt" href="{contato_url("Olá! Quero montar um projeto com a Smart Growth.")}" target="_blank" rel="noopener">Montar meu projeto{ic("seta")}</a>
 </article>''')
-    return f'''<section id="servicos" class="secao clara seta">
+    return f'''<section id="servicos" class="secao clara">
   <div class="conteudo">
     <div data-revelar>{olho("Serviços")}</div>
     <h2 class="titulo" data-revelar>{titulo_m("Escolha como quer ser", "visto.")}</h2>
