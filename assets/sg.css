@@ -309,3 +309,28 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 
 /* seleção de texto na cor da marca (como a RZD) */
 ::selection { background: #FA7715; color: #140A02; }
+
+/* casos no padrão da RZD: notebook com celular na frente, nome forte, lista com check e números */
+.caso { grid-template-columns: 1.05fr .95fr; gap: 64px; }
+.note { position: relative; padding: 0 6%; }
+.note-tela { position: relative; border-radius: 12px 12px 0 0; padding: 10px 10px 12px; background: #1c1f28; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 40px 80px -40px rgba(0,0,0,.9); }
+.note-tela img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 4px; }
+.note-tela .selo-conceito { top: 18px; left: 18px; }
+.note-base { height: 14px; margin: 0 -6%; border-radius: 0 0 14px 14px; background: linear-gradient(#3a3e4a, #23262f); box-shadow: 0 18px 30px -12px rgba(0,0,0,.8); position: relative; }
+.note-base::before { content: ""; position: absolute; left: 50%; top: 0; width: 16%; height: 5px; transform: translateX(-50%); border-radius: 0 0 8px 8px; background: #191b22; }
+.caso-tela .cel-flut { right: 2%; bottom: 34px; width: 27%; border-radius: 22px; padding: 6px; background: #14161c; }
+.caso-tela .cel-flut img { border-radius: 16px; }
+.caso h3 { margin-top: 12px; font: 700 clamp(2rem, 3.4vw, 2.9rem)/1.1 "Figtree", system-ui, sans-serif; letter-spacing: -.02em; text-transform: none; }
+.caso .seg { color: rgba(243, 244, 248, .55); }
+.caso h4 { margin-top: 28px; color: var(--marca); font-weight: 800; }
+.caso p { font-size: 1.05rem; }
+.caso ul.feito { gap: 14px; }
+.caso ul.feito li { display: flex; gap: 14px; padding-left: 0; font-size: 1.05rem; }
+.caso ul.feito li::before { content: none; }
+.caso ul.feito li svg { flex: none; width: 18px; height: 18px; margin-top: 4px; color: var(--marca); }
+.metricas { margin-top: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.metricas div { padding: 20px 22px; border-radius: 8px; background: rgba(255, 255, 255, .035); box-shadow: inset 0 0 0 1px var(--linha-escura); }
+.metricas b { display: block; font: 400 clamp(2.4rem, 4vw, 3.2rem)/1 "Anton", Impact, sans-serif; color: var(--marca); text-transform: uppercase; }
+.metricas span { display: block; margin-top: 10px; font-size: .9rem; color: rgba(243, 244, 248, .65); line-height: 1.4; }
+@media (max-width: 960px) { .caso { grid-template-columns: 1fr; gap: 36px; } .caso-tela .cel-flut { right: 0; bottom: 30px; width: 30%; } }
+.palco-veu.na-camada { position: absolute; z-index: 2; }

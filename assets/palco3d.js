@@ -125,11 +125,19 @@
 
   // brilho e clarão desenhados dentro do 3D
   function gradiente(paradas) {
-    var tl = document.createElement('canvas'); tl.width = tl.height = 256;
-    var cx = tl.getContext('2d'), gr = cx.createRadialGradient(128, 128, 0, 128, 128, 128);
-    paradas.forEach(function (p) { gr.addColorStop(p[0], p[1]); });
-    cx.fillStyle = gr; cx.fillRect(0, 0, 256, 256);
-    var tx = new T.CanvasTexture(tl); tx.encoding = T.sRGBEncoding; return tx;
+    var P = paradas.map(function (p) { var v = p[1].match(/[\d.]+/g).map(Number); return { o: p[0], r: v[0], g: v[1], b: v[2], a: v[3] }; });
+    var N = 128, d = new Uint8Array(N * N * 4);
+    for (var yy2 = 0; yy2 < N; yy2++) for (var xx = 0; xx < N; xx++) {
+      var r = Math.min(1, Math.hypot(xx + 0.5 - N / 2, yy2 + 0.5 - N / 2) / (N / 2)), k = 1;
+      while (k < P.length - 1 && P[k].o < r) k++;
+      var A = P[k - 1], B = P[k], u = Math.min(1, Math.max(0, (r - A.o) / Math.max(1e-6, B.o - A.o)));
+      var i4 = (yy2 * N + xx) * 4;
+      d[i4] = Math.round(A.r + (B.r - A.r) * u); d[i4 + 1] = Math.round(A.g + (B.g - A.g) * u); d[i4 + 2] = Math.round(A.b + (B.b - A.b) * u);
+      d[i4 + 3] = Math.round(255 * (A.a + (B.a - A.a) * u));
+    }
+    var tx = new T.DataTexture(d, N, N, T.RGBAFormat);
+    tx.magFilter = T.LinearFilter; tx.minFilter = T.LinearMipmapLinearFilter; tx.generateMipmaps = true;
+    tx.encoding = T.sRGBEncoding; tx.needsUpdate = true; return tx;
   }
   function sprite(tx, ordem, cobre) {
     var s = new T.Sprite(new T.SpriteMaterial({ map: tx, transparent: true, depthWrite: false, depthTest: false, toneMapped: false, blending: cobre ? T.NormalBlending : T.AdditiveBlending, opacity: 0 }));
@@ -216,11 +224,15 @@
   window.addEventListener('load', function () { medirPalco(); });
 
   var veu = document.createElement('div'); veu.className = 'palco-veu'; veu.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(veu);
+  if (fixa) { veu.classList.add('na-camada'); fixa.appendChild(veu); } else document.body.appendChild(veu);
   var estadoVeu = 'livre', ultimoVeu = -1;
+  function irPara(y) {
+    var raiz = document.documentElement, antes = raiz.style.scrollBehavior;
+    raiz.style.scrollBehavior = 'auto'; window.scrollTo(0, y); raiz.style.scrollBehavior = antes;
+  }
   function pularParaServicos() {
     estadoVeu = 'saltando'; veu.classList.remove('some'); veu.style.opacity = '1'; ultimoVeu = 1;
-    window.scrollTo({ top: servTopo, behavior: 'instant' });
+    irPara(servTopo);
     setTimeout(function () {
       veu.classList.add('some'); veu.style.opacity = '0'; ultimoVeu = 0; estadoVeu = 'sumindo';
     }, 90);
@@ -230,7 +242,7 @@
   function voltarParaPalco() {
     estadoVeu = 'saltando'; veu.classList.remove('some'); veu.style.opacity = '1'; ultimoVeu = 1;
     var alvoY = Math.round(chegada + (palcoFim - chegada) * 0.72);
-    window.scrollTo({ top: alvoY, behavior: 'instant' });
+    irPara(alvoY);
     yS = alvoY; sujo = true;
     setTimeout(function () {
       veu.classList.add('some'); veu.style.opacity = '0'; ultimoVeu = 0; estadoVeu = 'livre';
@@ -259,11 +271,16 @@
     var explode = faixa(g, 0.18, 0.36) * (1 - faixa(g, 0.48, 0.64)); // peças se afastam e voltam
     var bordas = faixa(g, 0.62, 0.74) * (1 - faixa(g, 0.9, 0.97));  // bordas acendem
     var acende = faixa(g, 0.72, 0.86);                               // frente esquenta
-    var flash = descendo ? faixa(g, 0.8, 0.92) : 0;                  // estouro de luz (só descendo)
+    var flash = (descendo || camada) ? faixa(g, 0.8, 0.92) : 0;      // estouro de luz
     var passou = camada ? 0 : Math.max(0, y - palcoFim);
 
     // flash: a tela fica clara e a página pula para Serviços por trás da luz (como a RZD)
     var gReal = (y - chegada) / (palcoFim - chegada);
+    if (camada) {
+      // celular: tudo pela rolagem, sem pulo (o navegador do celular ignora pulo com o dedo rolando)
+      var vc = faixa(g, 0.86, 0.95);
+      if (Math.abs(vc - ultimoVeu) > 0.01) { veu.style.opacity = vc.toFixed(3); ultimoVeu = vc; }
+    } else {
     var subindoNoFim = !descendo && servicos && !reduz && gReal > 0.76 && y < servTopo - 2;
     if (estadoVeu !== 'saltando' && subindoNoFim) voltarParaPalco();
     else if (estadoVeu === 'livre') {
@@ -272,6 +289,7 @@
       if (servicos && !reduz && descendo && gReal >= 0.95 && y < servTopo - 2) pularParaServicos();
     } else if (estadoVeu === 'sumindo' && y < chegada + (palcoFim - chegada) * 0.8) {
       veu.classList.remove('some'); estadoVeu = 'livre';
+    }
     }
 
     if ((camada ? y - palcoFim : passou) > vh * 1.4) {

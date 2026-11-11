@@ -220,15 +220,30 @@ def secao_servicos(raiz):
 </section>
 '''
 
+# Medições reais do Google Lighthouse nas prévias publicadas (celular, 4G simulado, mediana de 5).
+# Preenchido por medir_lighthouse.py; marca sem medição fica sem os cartões de número.
+import json as _json
+MEDIDAS = {}
+_arq = os.path.join(AQUI, "medidas.json")
+if os.path.exists(_arq):
+    MEDIDAS = _json.load(open(_arq, encoding="utf-8"))
+
 def tela(raiz, slug, cel=True, link=True):
     m = MARCAS[slug]
     flut = f'<div class="cel-flut"><img src="{raiz}assets/telas/{slug}-cel.webp" alt="" loading="lazy" width="390" height="780"></div>' if cel else ""
     lk = f'<a class="link" href="{raiz}previa/{slug}/" target="_blank" rel="noopener">{ic("fora")}Abrir o conceito</a>' if link else ""
     return f'''<div class="caso-tela" data-revelar>
-  <div class="tela"><div class="barra"><i></i><i></i><i></i></div><span class="selo-conceito">Conceito</span><img src="{raiz}assets/telas/{slug}-pc.webp" alt="Tela do conceito para {e(m["nome"])}" loading="lazy" width="1280" height="800"></div>
+  <div class="note"><div class="note-tela"><span class="selo-conceito">Conceito</span><img src="{raiz}assets/telas/{slug}-pc.webp" alt="Tela do conceito para {e(m["nome"])}" loading="lazy" width="1280" height="800"></div><div class="note-base"></div></div>
   {flut}
   {lk}
 </div>'''
+
+def numeros_caso(slug):
+    md = MEDIDAS.get(slug)
+    if not md:
+        return ""
+    seg = f'{md["lcp"]:.1f}'.replace(".", ",")
+    return f'''<div class="metricas"><div><b>{md["nota"]}</b><span>de 100 em desempenho no celular</span></div><div><b>{seg} s</b><span>para o site aparecer no celular</span></div></div>'''
 
 def secao_casos(raiz, slugs, titulo, intro):
     blocos = []
@@ -238,20 +253,24 @@ def secao_casos(raiz, slugs, titulo, intro):
   {tela(raiz, s)}
   <div data-revelar>
     <p class="seg">{e(m["seg"])} · conceito</p>
-    <h3 class="titulo">{e(m["nome"])}</h3>
+    <h3>{e(m["nome"])}</h3>
     <h4>O cenário</h4><p>{e(c["cena"])}</p>
     <h4>O que propomos</h4>
-    <ul class="feito">{"".join(f"<li>{e(x)}</li>" for x in c["feito"])}</ul>
-    <ul class="entregas">{"".join(f"<li>{e(x)}</li>" for x in c["entregas"])}</ul>
+    <ul class="feito">{"".join(f"<li>{ic('ok')}<span>{e(x)}</span></li>" for x in c["feito"])}</ul>
+    {numeros_caso(s)}
   </div>
 </article>''')
+    nota_med = ""
+    if any(s in MEDIDAS for s in slugs):
+        d = next(MEDIDAS[s] for s in slugs if s in MEDIDAS)
+        nota_med = f" Notas do Google Lighthouse no celular, com 4G simulado, na mediana de {d['medicoes']} medições feitas em {d['data']} nas prévias publicadas."
     return f'''<section id="casos" class="secao escura seta depois-clara">
   <div class="conteudo">
     <div data-revelar>{olho("Casos")}</div>
     <h2 class="titulo" data-revelar>{titulo}</h2>
     <p class="intro apoio" data-revelar>{e(intro)}</p>
     <div class="casos">{"".join(blocos)}</div>
-    <p class="nota">Projetos conceito criados pela Smart Growth para esta apresentação. Não foram encomendados pelas marcas, que pertencem aos seus donos.</p>
+    <p class="nota">Projetos conceito criados pela Smart Growth para esta apresentação. Não foram encomendados pelas marcas, que pertencem aos seus donos.{nota_med}</p>
   </div>
 </section>
 '''
