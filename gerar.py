@@ -403,7 +403,7 @@ def pagina_inicio():
     <div class="lado-g"><div class="g-alvo" data-g-alvo><img src="assets/favicon.svg" alt="" width="440" height="270"></div></div>
   </div>
 </section>
-<div class="palco" data-palco aria-hidden="true"><p class="frase">Crescimento inteligente</p></div>
+<div class="palco" data-palco aria-hidden="true"></div>
 '''
     h += secao_servicos(r)
     h += secao_modelos(r, ["adidas","v4","havaianas","cocacola"])

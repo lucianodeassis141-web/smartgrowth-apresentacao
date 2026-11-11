@@ -22,6 +22,10 @@ Para atualizar: `python gerar.py`, depois `git add -A && git commit -m ... && gi
 - Se mudar uma prévia, tire os prints de novo (1280x800 e 390x780, sem a faixa) e salve em `assets/telas/` como `.webp`.
 - Para abrir: `python -m http.server 8765` nesta pasta e acesse http://127.0.0.1:8765/. Também abre com dois cliques no index.html.
 
+## Números dos casos
+- Os cartões "de 100 em desempenho no celular" e "segundos para aparecer" vêm de medição real do Google Lighthouse nas prévias publicadas (celular, 4G simulado, mediana de 5), gravada em `medidas.json`. Medido em 11/11/2026: Nike 99, Smart Fit, O Boticário, Natura e Havaianas 100; 0,9 a 1,0 s.
+- Para medir de novo: `python medir_lighthouse.py` e depois `python gerar.py`. Não escrever número à mão.
+
 ## Em aberto
 - WhatsApp: os botões dizem "Chamar no WhatsApp" (pedido do Luciano, 11/11). Sem o número da SG, o link abre o WhatsApp com a mensagem pronta para escolher o contato. Quando houver número, pôr em `WHATSAPP` no `gerar.py`.
 - Quem aparece no "Quem somos" (a RZD mostra os sócios): [PENDENTE DE VALIDAÇÃO]. Por enquanto, só o texto e o símbolo.

@@ -334,3 +334,7 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 .metricas span { display: block; margin-top: 10px; font-size: .9rem; color: rgba(243, 244, 248, .65); line-height: 1.4; }
 @media (max-width: 960px) { .caso { grid-template-columns: 1fr; gap: 36px; } .caso-tela .cel-flut { right: 0; bottom: 30px; width: 30%; } }
 .palco-veu.na-camada { position: absolute; z-index: 2; }
+/* títulos de linhas juntas: seleção translúcida para uma linha não cobrir a outra */
+.titulo::selection, .metricas b::selection, .numeros b::selection, .passos b::selection { background: rgba(250, 119, 21, .3); color: var(--papel); }
+.clara .titulo::selection, .clara .numeros b::selection { color: var(--texto); }
+.titulo .m::selection, .metricas b::selection, .passos b::selection { background: rgba(250, 119, 21, .3); color: var(--marca); }

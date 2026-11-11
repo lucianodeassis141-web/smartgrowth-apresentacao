@@ -284,7 +284,7 @@
     var subindoNoFim = !descendo && servicos && !reduz && gReal > 0.76 && y < servTopo - 2;
     if (estadoVeu !== 'saltando' && subindoNoFim) voltarParaPalco();
     else if (estadoVeu === 'livre') {
-      var vo = descendo ? faixa(g, 0.86, 0.95) : 0;
+      var vo = (descendo && y < servTopo - 2) ? faixa(g, 0.86, 0.95) : 0; // depois de Serviços a luz nunca fica
       if (Math.abs(vo - ultimoVeu) > 0.01) { veu.style.opacity = vo.toFixed(3); ultimoVeu = vo; }
       if (servicos && !reduz && descendo && gReal >= 0.95 && y < servTopo - 2) pularParaServicos();
     } else if (estadoVeu === 'sumindo' && y < chegada + (palcoFim - chegada) * 0.8) {
