@@ -23,6 +23,17 @@
   renderer.outputEncoding = T.sRGBEncoding;
   renderer.toneMapping = T.ACESFilmicToneMapping;
 
+  /* Celular (como a RZD): o 3D fica numa camada que primeiro rola junto com a página e depois gruda
+     no meio da tela. Quem move o símbolo é o próprio navegador, não o código, então não trava. */
+  var main = document.querySelector('main'), topoEl = document.querySelector('.topo');
+  var camada = null, fixa = null;
+  if (movel && main) {
+    main.style.position = 'relative';
+    camada = document.createElement('div'); camada.className = 'palco3d-camada'; camada.setAttribute('aria-hidden', 'true');
+    fixa = document.createElement('div'); fixa.className = 'palco3d-fixa';
+    fixa.appendChild(canvas); camada.appendChild(fixa); main.insertBefore(camada, main.firstChild);
+  }
+
   var cena = new T.Scene();
   var camera = new T.PerspectiveCamera(30, 1, 0.1, 100);
   camera.position.set(0, 0, 12);
@@ -83,6 +94,7 @@
     vw = nw; vh = nh;
     renderer.setSize(vw, vh, false);
     canvas.style.height = vh + 'px';
+    if (fixa) fixa.style.height = vh + 'px';
     camera.aspect = vw / vh; camera.updateProjectionMatrix();
     mundoH = 2 * camera.position.z * Math.tan((camera.fov * Math.PI / 180) / 2);
     sujo = true;
@@ -114,14 +126,23 @@
   }
 
   // medidas do palco, refeitas só quando a página muda de tamanho
-  var chegada = 1, palcoFim = 1, alvoX = 0, alvoY = 0, alvoW = 0;
+  var chegada = 1, palcoFim = 1, alvoX = 0, alvoY = 0, alvoW = 0, meioQ = 0;
   function medirPalco() {
     var y = window.scrollY;
+    var rp = palco.getBoundingClientRect(), palcoTopo = rp.top + y, palcoBase = rp.bottom + y;
     // chegada: o símbolo no meio da tela; depois ele gira 360 e brilha até o fim do palco
-    chegada = Math.max(1, palco.offsetTop - vh * 0.15);
-    palcoFim = Math.max(chegada + 1, palco.offsetTop + palco.offsetHeight - vh);
+    chegada = Math.max(1, palcoTopo - vh * 0.15);
+    palcoFim = Math.max(chegada + 1, palcoBase - vh);
     var r = alvo.getBoundingClientRect();
     alvoX = r.left + r.width / 2; alvoY = r.top + y + r.height / 2; alvoW = r.width;
+    if (camada) {
+      var cab = topoEl ? topoEl.offsetHeight : 0;
+      meioQ = cab + (vh - cab) / 2;                    // onde o símbolo fica quando a camada gruda
+      var mainTopo = main.getBoundingClientRect().top + y;
+      var inicio = alvoY - meioQ;                      // a camada começa de modo que o símbolo caia na caixa
+      camada.style.top = (inicio - mainTopo) + 'px';
+      camada.style.height = Math.max(vh, palcoBase - inicio) + 'px';
+    }
     sujo = true;
   }
 
@@ -149,9 +170,9 @@
     var g = Math.min(1, Math.max(0, (yS - chegada) / (palcoFim - chegada)));
     var giro = g < 0.5 ? 4 * g * g * g : 1 - Math.pow(-2 * g + 2, 3) / 2; // entra e sai devagar
     var forte = Math.sin(Math.PI * g); // brilho mais forte no meio do giro
-    var passou = Math.max(0, y - palcoFim);
+    var passou = camada ? 0 : Math.max(0, y - palcoFim);
 
-    if (passou > vh * 1.4) {
+    if ((camada ? y - palcoFim : passou) > vh * 1.4) {
       if (!escondido) { canvas.style.visibility = 'hidden'; if (brilho) brilho.style.opacity = 0; escondido = true; }
       return;
     } else if (escondido) { canvas.style.visibility = 'visible'; escondido = false; }
@@ -166,11 +187,12 @@
     }
 
     // partida: a caixa ao lado (ou embaixo) do título; chegada: meio da tela
-    var topoAlvo = alvoY - y;
+    // no celular a posição na tela é fixa (o meio da camada); quem move é a própria página
+    var topoAlvo = camada ? meioQ : alvoY - y;
     var ini = pxParaMundo(alvoX, topoAlvo);
     var larg0 = alvoW * ini.k;
     var larg1 = Math.min(vw * 0.82, vh * 0.42 * (W / H)) * ini.k;
-    var centro = pxParaMundo(vw / 2, vh / 2 - passou);
+    var centro = pxParaMundo(vw / 2, camada ? meioQ : vh / 2 - passou);
 
     var x = lerp(ini.x, centro.x, t);
     var yy = lerp(ini.y, centro.y, t) + (1 - desce) * (mundoH * 0.55);
