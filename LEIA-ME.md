@@ -8,6 +8,7 @@ Para atualizar: `python gerar.py`, depois `git add -A && git commit -m ... && gi
 
 ## O que tem
 - `index.html`: topo com o **símbolo SG em 3D** (three.js). Ele desce do alto e acende como lâmpada quando a página abre. Ao rolar, vai para o meio da tela, gira, cresce e brilha em laranja (efeito do "R" da RZD). Sem WebGL, aparece o símbolo parado.
+  No celular (11/11, na pegada da RZD): o G fica embaixo do texto e aparece na primeira tela, o texto some ao rolar, e o 3D é leve (resolução limitada, só desenha quando algo muda e ignora a barra do navegador).
   Depois vêm, nesta ordem: Serviços, Conceitos, Portfólio (esteira), Casos, A diferença, Como funciona, Sobre e Contato.
 - `profissionais/` e `negocios/`: páginas por público, como as da RZD.
 - `previa/<marca>/`: 8 sites conceito de marcas famosas: Nike, adidas, V4 Company, Smart Fit, Natura, O Boticário, Havaianas e Coca-Cola.

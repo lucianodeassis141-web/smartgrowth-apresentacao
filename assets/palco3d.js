@@ -1,25 +1,28 @@
 /* Smart Growth · palco 3D do símbolo
    O símbolo SG desce do alto e acende quando a página abre.
-   Ao rolar, ele sai do lado do título, vai para o meio da tela, gira, cresce e brilha em laranja.
+   Ao rolar, o texto do topo some aos poucos e o símbolo vai para o meio da tela, gira, cresce e brilha em laranja.
+   Leve no celular: resolução limitada, desenha só quando algo muda e ignora a barra do navegador subindo e descendo.
    Sem WebGL, fica a imagem estática no lugar. */
 (function () {
   var alvo = document.querySelector('[data-g-alvo]');
   var palco = document.querySelector('[data-palco]');
   var canvas = document.querySelector('.palco3d-canvas');
   var brilho = document.querySelector('.palco3d-brilho');
+  var texto = document.querySelector('[data-palco-texto]');
   if (!alvo || !canvas || !window.THREE) return;
 
   var reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var movel = window.matchMedia('(max-width: 960px), (pointer: coarse)').matches;
+  var dpr = Math.min(window.devicePixelRatio || 1, movel ? 1.5 : 2);
   var T = window.THREE;
   var renderer;
   try {
-    renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer = new T.WebGLRenderer({ canvas: canvas, antialias: dpr < 1.5, alpha: true, powerPreference: movel ? 'default' : 'high-performance' });
   } catch (e) { return; }
   document.documentElement.classList.add('tem-3d');
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(dpr);
   renderer.outputEncoding = T.sRGBEncoding;
   renderer.toneMapping = T.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
 
   var cena = new T.Scene();
   var camera = new T.PerspectiveCamera(30, 1, 0.1, 100);
@@ -41,7 +44,8 @@
     else if (cmd === 'Z') { f.closePath(); }
   }
   var geo = new T.ExtrudeGeometry(formas, {
-    depth: 0.16, bevelEnabled: true, bevelThickness: 0.014, bevelSize: 0.009, bevelSegments: 4, curveSegments: 40
+    depth: 0.16, bevelEnabled: true, bevelThickness: 0.014, bevelSize: 0.009,
+    bevelSegments: movel ? 2 : 3, curveSegments: movel ? 14 : 24
   });
   geo.center();
 
@@ -49,9 +53,8 @@
   var corLado0 = new T.Color('#FA7715'), corLado1 = new T.Color('#B8400A');
   var frente = new T.MeshStandardMaterial({ color: corFrente0.clone(), roughness: 0.38, metalness: 0.08, emissive: new T.Color('#E85A00'), emissiveIntensity: 0 });
   var lado = new T.MeshStandardMaterial({ color: corLado0.clone(), roughness: 0.45, metalness: 0.12, emissive: new T.Color('#C2410C'), emissiveIntensity: 0.15 });
-  var g = new T.Mesh(geo, [frente, lado]);
   var grupo = new T.Group();
-  grupo.add(g);
+  grupo.add(new T.Mesh(geo, [frente, lado]));
   cena.add(grupo);
 
   cena.add(new T.AmbientLight(0xffffff, 0.35));
@@ -59,13 +62,19 @@
   var recorte = new T.DirectionalLight(0xff8a3d, 1.1); recorte.position.set(5, -2, -3); cena.add(recorte);
   var quente = new T.PointLight(0xff7a1a, 0, 9); quente.position.set(0, 0, 2.5); cena.add(quente);
 
-  /* ---- medidas ---- */
-  var vw = 0, vh = 0, mundoH = 0;
-  function medir() {
-    vw = window.innerWidth; vh = window.innerHeight;
+  /* ---- medidas ----
+     No celular a barra do navegador muda a altura da tela o tempo todo. Só redimensiona
+     quando a largura muda ou a altura muda muito (girar o aparelho). */
+  var vw = 0, vh = 0, mundoH = 0, BRILHO_BASE = 1000;
+  function medir(forcar) {
+    var nw = window.innerWidth, nh = window.innerHeight;
+    if (!forcar && nw === vw && Math.abs(nh - vh) < 160) return;
+    vw = nw; vh = nh;
     renderer.setSize(vw, vh, false);
+    canvas.style.height = vh + 'px';
     camera.aspect = vw / vh; camera.updateProjectionMatrix();
     mundoH = 2 * camera.position.z * Math.tan((camera.fov * Math.PI / 180) / 2);
+    sujo = true;
   }
   function pxParaMundo(x, y) {
     var k = mundoH / vh;
@@ -78,8 +87,8 @@
   /* ---- abertura: desce e acende ---- */
   var t0 = performance.now();
   var DUR_DESCE = reduz ? 0 : 1900, INICIO_LUZ = reduz ? 0 : 1100, DUR_LUZ = reduz ? 0 : 1500;
+  var FIM_ABERTURA = INICIO_LUZ + DUR_LUZ + 100;
   function piscar(ms) {
-    // tremida de lâmpada acendendo, termina acesa
     if (ms <= 0) return 0;
     if (ms >= DUR_LUZ) return 1;
     var p = ms / DUR_LUZ;
@@ -93,48 +102,68 @@
     return 1;
   }
 
-  var rodando = true;
+  // medidas do palco, refeitas só quando a página muda de tamanho
+  var palcoFim = 1, alvoX = 0, alvoY = 0, alvoW = 0;
+  function medirPalco() {
+    var y = window.scrollY;
+    palcoFim = Math.max(1, palco.offsetTop + palco.offsetHeight / 2 - vh / 2);
+    var r = alvo.getBoundingClientRect();
+    alvoX = r.left + r.width / 2; alvoY = r.top + y + r.height / 2; alvoW = r.width;
+    sujo = true;
+  }
+
+  if (brilho) { brilho.style.width = brilho.style.height = BRILHO_BASE + 'px'; }
+
+  var sujo = true, ultimoY = -1, ultimoTexto = -1, escondido = false;
+  window.addEventListener('scroll', function () { sujo = true; }, { passive: true });
+  window.addEventListener('resize', function () { medir(false); medirPalco(); });
+  window.addEventListener('load', function () { medirPalco(); });
+
   function quadro(agora) {
+    requestAnimationFrame(quadro);
     var ms = agora - t0;
+    var abrindo = ms < FIM_ABERTURA;
+    var y = window.scrollY;
+    var flutuar = !movel && !reduz;
+    if (!abrindo && !flutuar && !sujo && y === ultimoY) return; // nada mudou: não desenha
+    sujo = false; ultimoY = y;
+
+    var t = suave(y / palcoFim);
+    var passou = Math.max(0, y - palcoFim);
+
+    if (passou > vh * 1.4) {
+      if (!escondido) { canvas.style.visibility = 'hidden'; if (brilho) brilho.style.opacity = 0; escondido = true; }
+      return;
+    } else if (escondido) { canvas.style.visibility = 'visible'; escondido = false; }
+
     var desce = reduz ? 1 : sai(ms / DUR_DESCE);
     var luz = reduz ? 1 : piscar(ms - INICIO_LUZ);
 
-    // progresso da rolagem: 0 no topo, 1 quando o palco está no meio da tela
-    var y = window.scrollY;
-    var palcoTopo = palco.offsetTop, palcoAlt = palco.offsetHeight;
-    var fim = Math.max(1, palcoTopo + palcoAlt / 2 - vh / 2);
-    var t = suave(y / fim);
-    var passou = Math.max(0, y - fim);
+    // texto do topo some enquanto o símbolo assume a tela
+    if (texto) {
+      var op = Math.max(0, 1 - t * 1.7);
+      if (Math.abs(op - ultimoTexto) > 0.01) { texto.style.opacity = op.toFixed(2); ultimoTexto = op; }
+    }
 
-    if (passou > vh * 1.4) {
-      if (rodando) { canvas.style.visibility = 'hidden'; if (brilho) brilho.style.opacity = 0; rodando = false; }
-      requestAnimationFrame(quadro); return;
-    } else if (!rodando) { canvas.style.visibility = 'visible'; rodando = true; }
-
-    // ponto de partida: a caixa ao lado do título
-    var r = alvo.getBoundingClientRect();
-    // r.top já desconta a rolagem: no topo o símbolo acompanha a caixa, descendo ele vai para o centro
-    var ini = pxParaMundo(r.left + r.width / 2, r.top + r.height / 2);
-    var larg0 = r.width * ini.k;
-    var larg1 = Math.min(vw * 0.78, vh * 0.42 * (W / H)) * ini.k;
+    // partida: a caixa ao lado (ou embaixo) do título; chegada: meio da tela
+    var topoAlvo = alvoY - y;
+    var ini = pxParaMundo(alvoX, topoAlvo);
+    var larg0 = alvoW * ini.k;
+    var larg1 = Math.min(vw * 0.82, vh * 0.42 * (W / H)) * ini.k;
     var centro = pxParaMundo(vw / 2, vh / 2 - passou);
-    var x = lerp(ini.x, centro.x, t);
-    var yy = lerp(ini.y, centro.y, t);
-    var esc = lerp(larg0, larg1, t);
 
-    // abertura: começa acima e desce
-    yy += (1 - desce) * (mundoH * 0.55);
-    var flutua = reduz ? 0 : Math.sin(ms / 1400) * 0.04 * desce;
+    var x = lerp(ini.x, centro.x, t);
+    var yy = lerp(ini.y, centro.y, t) + (1 - desce) * (mundoH * 0.55);
+    var flutua = flutuar ? Math.sin(ms / 1400) * 0.04 * desce : 0;
 
     grupo.position.set(x, yy + flutua, 0);
-    grupo.scale.setScalar(esc);
+    grupo.scale.setScalar(lerp(larg0, larg1, t));
     grupo.rotation.set(
       lerp(0.22, 0.32, t) + (1 - desce) * -0.6,
-      lerp(-0.42, 0.38, t) + Math.sin(ms / 2600) * 0.05 * (1 - t),
+      lerp(-0.42, 0.38, t) + (flutuar ? Math.sin(ms / 2600) * 0.05 * (1 - t) : 0),
       lerp(-0.05, -0.12, t)
     );
 
-    // brilho: acende na abertura e esquenta ao rolar
     var calor = t;
     frente.color.copy(corFrente0).lerp(corFrente1, calor);
     lado.color.copy(corLado0).lerp(corLado1, calor);
@@ -144,19 +173,18 @@
     renderer.toneMappingExposure = 0.95 + luz * 0.08 - calor * 0.08;
 
     if (brilho) {
-      var bx = lerp(r.left + r.width / 2, vw / 2, t);
-      var by = lerp(r.top + r.height / 2, vh / 2, t) - passou + (1 - desce) * -vh * 0.4;
-      var tam = lerp(r.width * 1.9, Math.max(vw, vh) * 0.95, t);
-      brilho.style.transform = 'translate(' + (bx - tam / 2) + 'px,' + (by - tam / 2) + 'px)';
-      brilho.style.width = brilho.style.height = tam + 'px';
+      var bx = lerp(alvoX, vw / 2, t);
+      var by = lerp(topoAlvo, vh / 2, t) - passou + (1 - desce) * -vh * 0.4;
+      var tam = lerp(alvoW * 1.9, Math.max(vw, vh) * 0.95, t);
+      var s = tam / BRILHO_BASE;
+      brilho.style.transform = 'translate3d(' + (bx - tam / 2).toFixed(1) + 'px,' + (by - tam / 2).toFixed(1) + 'px,0) scale(' + s.toFixed(4) + ')';
       brilho.style.opacity = (luz * (0.55 + calor * 0.45)).toFixed(3);
     }
 
     renderer.render(cena, camera);
-    requestAnimationFrame(quadro);
   }
 
-  medir();
-  window.addEventListener('resize', medir);
+  medir(true);
+  medirPalco();
   requestAnimationFrame(quadro);
 })();

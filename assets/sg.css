@@ -65,11 +65,13 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 }
 
 /* faixa conceito */
+.aviso-conceito .curto { display: none; }
+@media (max-width: 640px) { .aviso-conceito .curto { display: inline; } }
 .aviso-conceito { background: var(--marca); color: #140A02; text-align: center; font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; padding: 8px var(--lado); }
 
 /* palco 3D */
 .palco3d-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
-.palco3d-brilho { position: fixed; left: 0; top: 0; z-index: 0; pointer-events: none; border-radius: 50%; opacity: 0; background: radial-gradient(circle, rgba(255, 140, 50, .42) 0%, rgba(250, 119, 21, .14) 32%, rgba(250, 119, 21, .04) 60%, rgba(250, 119, 21, 0) 72%); will-change: transform, opacity; }
+.palco3d-brilho { position: fixed; left: 0; top: 0; z-index: 0; pointer-events: none; border-radius: 50%; opacity: 0; background: radial-gradient(circle, rgba(255, 140, 50, .42) 0%, rgba(250, 119, 21, .14) 32%, rgba(250, 119, 21, .04) 60%, rgba(250, 119, 21, 0) 72%); will-change: transform, opacity; transform-origin: 0 0; }
 .g-alvo { aspect-ratio: 1557 / 954; width: 100%; max-width: 440px; margin-inline: auto; position: relative; }
 .g-alvo img { width: 100%; height: 100%; filter: drop-shadow(0 20px 60px rgba(250, 119, 21, .45)); }
 .tem-3d .g-alvo img { visibility: hidden; }
@@ -90,10 +92,10 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   .inicio .conteudo { grid-template-columns: 1fr; text-align: center; padding-top: 32px; gap: 8px; }
   .inicio .olho, .inicio .bts, .selos { justify-content: center; }
   .inicio .apoio { margin-inline: auto; }
-  .inicio .lado-g { order: -1; width: min(300px, 70%); margin: 0 auto; }
+  .inicio .lado-g { width: min(340px, 82%); margin: 28px auto 0; }
   .inicio .bts .bt { flex: 1 1 220px; }
 }
-.palco { height: 120vh; position: relative; z-index: 1; }
+.palco { height: 120vh; height: 120lvh; position: relative; z-index: 1; }
 .palco .frase { position: sticky; top: calc(100vh - 140px); text-align: center; font-size: .72rem; letter-spacing: .3em; text-transform: uppercase; color: rgba(243, 244, 248, .55); font-weight: 700; }
 
 /* seções */
@@ -268,3 +270,32 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 /* botão flutuante */
 .flutua-zap { position: fixed; right: 20px; bottom: 20px; z-index: 50; width: 56px; height: 56px; border-radius: 8px; display: grid; place-items: center; background: var(--marca); color: #140A02; box-shadow: 0 14px 30px -10px rgba(250, 119, 21, .8); }
 .flutua-zap svg { width: 26px; height: 26px; }
+
+/* celular: mais leve */
+@media (max-width: 960px), (pointer: coarse) {
+  .topo { backdrop-filter: none; background: var(--tinta); }
+  .esteira { mask-image: none; }
+  .esteira .trilho { animation-duration: 45s; }
+  .palco { height: 100vh; height: 100lvh; }
+  .cartao::after { display: none; }
+  .palco3d-canvas { height: 100lvh; }
+}
+
+/* celular: topo compacto para o G aparecer na primeira tela, como na RZD */
+@media (max-width: 640px) {
+  .aviso-conceito { font-size: .6rem; padding: 6px 12px; letter-spacing: .1em; }
+  .aviso-conceito .longo { display: none; }
+  .topo .conteudo { height: 60px; }
+  .topo.aberto nav { top: 60px; }
+  .inicio .conteudo { min-height: 0; padding: 22px 0 40px; }
+  .inicio .olho { font-size: .6rem; letter-spacing: .14em; }
+  .inicio .olho .barras { display: none; }
+  .inicio h1 { margin-top: 12px; font-size: clamp(2.3rem, 11vw, 2.9rem); }
+  .inicio .apoio { margin-top: 12px; font-size: .95rem; line-height: 1.5; }
+  .inicio .bts { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .inicio .bts .bt { height: 48px; padding: 0 8px; font-size: .64rem; letter-spacing: .08em; gap: 6px; }
+  .inicio .bts .bt svg { width: 14px; height: 14px; }
+  .inicio .zap { margin-top: 6px; font-size: .85rem; }
+  .selos { margin-top: 12px; padding-top: 12px; gap: 6px 16px; font-size: .78rem; }
+  .inicio .lado-g { width: 70%; margin-top: 4px; }
+}

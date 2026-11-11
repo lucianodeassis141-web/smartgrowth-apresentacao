@@ -166,7 +166,7 @@ def cabeca(titulo, desc, raiz):
 <link rel="stylesheet" href="{raiz}assets/sg.css?v={v("sg.css")}">
 </head>
 <body>
-<div class="aviso-conceito">Apresentação · os projetos de marcas famosas são conceitos, sem vínculo com as marcas</div>
+<div class="aviso-conceito">Apresentação<span class="longo"> · os projetos de marcas famosas são conceitos, sem vínculo com as marcas</span><span class="curto"> · marcas em conceito, sem vínculo</span></div>
 '''
 
 def topo(raiz, pagina):
@@ -372,7 +372,7 @@ def pagina_inicio():
 <main>
 <section id="inicio" class="inicio">
   <div class="conteudo">
-    <div>
+    <div data-palco-texto>
       <div data-revelar>''' + olho("Sites, sistemas e marketing para profissionais e negócios") + '''</div>
       <h1 class="titulo" data-revelar style="--atraso:.08s">Não basta estar na internet. É&nbsp;preciso <span class="m">ser escolhido.</span></h1>
       <p class="apoio" data-revelar style="--atraso:.16s">Fazemos sites, sistemas, automações e marketing para passar confiança, destacar a sua marca e aumentar as suas vendas.</p>
