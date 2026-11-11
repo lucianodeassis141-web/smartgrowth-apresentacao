@@ -9,15 +9,14 @@ import hashlib
 def v(arq):
     return hashlib.md5(open(os.path.join(AQUI, "assets", arq), "rb").read()).hexdigest()[:8]
 
-# Sem WhatsApp da SG ainda: os botões levam ao direct do Instagram. Quando houver número, pôr aqui (ex.: "5537999999999").
+# Número do WhatsApp da SG, só dígitos com 55 e DDD (ex.: "5537999999999").
 WHATSAPP = ""
 INSTAGRAM = "https://instagram.com/smartgrowthai"
 def contato_url(msg="Olá! Vi o site da Smart Growth e quero conversar."):
-    if WHATSAPP:
-        from urllib.parse import quote
-        return f"https://wa.me/{WHATSAPP}?text={quote(msg)}"
-    return "https://ig.me/m/smartgrowthai"
-CONTATO_ROTULO = "Chamar no WhatsApp" if WHATSAPP else "Chamar no Instagram"
+    from urllib.parse import quote
+    # Sem número, o wa.me abre o WhatsApp com a mensagem pronta para escolher o contato.
+    return f"https://wa.me/{WHATSAPP}?text={quote(msg)}"
+CONTATO_ROTULO = "Chamar no WhatsApp"
 
 e = html.escape
 
@@ -360,7 +359,7 @@ def rodape(raiz):
     </footer>
   </div>
 </section>
-<a class="flutua-zap" href="{contato_url()}" target="_blank" rel="noopener" aria-label="{CONTATO_ROTULO}">{ZAP if WHATSAPP else IG}</a>
+<a class="flutua-zap" href="{contato_url()}" target="_blank" rel="noopener" aria-label="{CONTATO_ROTULO}">{ZAP}</a>
 <script src="{raiz}assets/sg.js?v={v("sg.js")}" defer></script>
 '''
 
@@ -379,7 +378,7 @@ def pagina_inicio():
       <p class="apoio" data-revelar style="--atraso:.16s">Fazemos sites, sistemas, automações e marketing para passar confiança, destacar a sua marca e aumentar as suas vendas.</p>
       <div data-revelar style="--atraso:.24s">
         <div class="bts"><a class="bt bt-marca" href="profissionais/">Sou profissional''' + ic("seta") + '''</a><a class="bt bt-linha" href="negocios/">Tenho um negócio''' + ic("seta") + '''</a></div>
-        <a class="zap" href="''' + contato_url() + '''" target="_blank" rel="noopener">''' + ic("conversa") + '''Ou fale direto com a gente</a>
+        <a class="zap" href="''' + contato_url() + '''" target="_blank" rel="noopener">''' + ic("conversa") + '''Ou chame direto no WhatsApp</a>
       </div>
       <ul class="selos" data-revelar style="--atraso:.32s"><li>''' + ic("lapis") + '''Tudo feito por nós</li><li>''' + ic("relogio") + '''Prazo combinado desde o início</li><li>''' + ic("conversa") + '''Atendimento direto</li></ul>
     </div>

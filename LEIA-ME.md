@@ -21,6 +21,6 @@ Para atualizar: `python gerar.py`, depois `git add -A && git commit -m ... && gi
 - Para abrir: `python -m http.server 8765` nesta pasta e acesse http://127.0.0.1:8765/. Também abre com dois cliques no index.html.
 
 ## Em aberto
-- WhatsApp da SG: não existe ainda. Os botões levam ao direct do Instagram (@smartgrowthai). Quando houver número, é só pôr em `WHATSAPP` no `gerar.py`.
+- WhatsApp: os botões dizem "Chamar no WhatsApp" (pedido do Luciano, 11/11). Sem o número da SG, o link abre o WhatsApp com a mensagem pronta para escolher o contato. Quando houver número, pôr em `WHATSAPP` no `gerar.py`.
 - Quem aparece no "Quem somos" (a RZD mostra os sócios): [PENDENTE DE VALIDAÇÃO]. Por enquanto, só o texto e o símbolo.
 - Números do portfólio: 8 marcas conceito, 8 frentes e 3 passos. São reais e não dizem que alguém é cliente.
