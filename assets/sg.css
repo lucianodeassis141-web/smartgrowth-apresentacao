@@ -302,3 +302,7 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 .palco3d-camada { position: absolute; left: 0; right: 0; z-index: 0; pointer-events: none; }
 .palco3d-fixa { position: sticky; top: 0; width: 100%; overflow: hidden; }
 .palco3d-camada .palco3d-canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+
+/* véu do flash: cobre a tela enquanto a página pula para Serviços */
+.palco-veu { position: fixed; inset: 0; z-index: 35; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 50%, #FFFDF8 0%, #F8F3EC 45%, #F3F4F8 100%); }
+.palco-veu.some { transition: opacity .75s ease-out; }

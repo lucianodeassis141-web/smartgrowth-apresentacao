@@ -99,9 +99,11 @@
     var limite = Math.cos(35 * Math.PI / 180);
     for (var v3 = 0; v3 < nv; v3++) {
       var lista = mapa[chave(v3)], fx = faces[v3 * 3], fy = faces[v3 * 3 + 1], fz = faces[v3 * 3 + 2], sx = 0, sy = 0, sz = 0;
+      // frente e fundo ficam planos (sem riscos); só as laterais e o chanfro se suavizam entre si
+      if (Math.abs(fz) > 0.97) { nor.setXYZ(v3, fx, fy, fz); continue; }
       for (var j = 0; j < lista.length; j++) {
         var o = lista[j], ox = faces[o * 3], oy = faces[o * 3 + 1], oz = faces[o * 3 + 2];
-        if (fx * ox + fy * oy + fz * oz >= limite) { sx += ox; sy += oy; sz += oz; }
+        if (Math.abs(oz) <= 0.97 && fx * ox + fy * oy + fz * oz >= limite) { sx += ox; sy += oy; sz += oz; }
       }
       var l = Math.hypot(sx, sy, sz) || 1; nor.setXYZ(v3, sx / l, sy / l, sz / l);
     }
@@ -213,6 +215,17 @@
   window.addEventListener('resize', function () { medir(false); medirPalco(); });
   window.addEventListener('load', function () { medirPalco(); });
 
+  var veu = document.createElement('div'); veu.className = 'palco-veu'; veu.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(veu);
+  var estadoVeu = 'livre', ultimoVeu = -1;
+  function pularParaServicos() {
+    estadoVeu = 'saltando'; veu.classList.remove('some'); veu.style.opacity = '1'; ultimoVeu = 1;
+    window.scrollTo({ top: servTopo, behavior: 'instant' });
+    setTimeout(function () {
+      veu.classList.add('some'); veu.style.opacity = '0'; ultimoVeu = 0; estadoVeu = 'sumindo';
+    }, 90);
+  }
+
   var ultimoY = -1, ultimoTexto = -1, escondido = false, yS = -1, tAnt = 0, pronto = false;
 
   function quadro(agora) {
@@ -233,9 +246,20 @@
     var g = Math.min(1, Math.max(0, (yS - chegada) / (palcoFim - chegada)));
     var giro = faixa(g, 0.04, 0.62);                                 // volta inteira
     var explode = faixa(g, 0.18, 0.36) * (1 - faixa(g, 0.48, 0.64)); // peças se afastam e voltam
-    var acende = Math.sin(Math.PI * faixa(g, 0.6, 0.86));           // acende forte
-    var flash = faixa(g, 0.84, 0.97);                                // clarão que vira a seção clara
+    var bordas = faixa(g, 0.62, 0.74) * (1 - faixa(g, 0.9, 0.97));  // bordas acendem
+    var acende = faixa(g, 0.72, 0.86);                               // frente esquenta
+    var flash = faixa(g, 0.8, 0.92);                                 // estouro de luz saindo do centro
     var passou = camada ? 0 : Math.max(0, y - palcoFim);
+
+    // flash: a tela fica clara e a página pula para Serviços por trás da luz (como a RZD)
+    var gReal = (y - chegada) / (palcoFim - chegada);
+    if (estadoVeu === 'livre') {
+      var vo = faixa(g, 0.86, 0.95);
+      if (Math.abs(vo - ultimoVeu) > 0.01) { veu.style.opacity = vo.toFixed(3); ultimoVeu = vo; }
+      if (servicos && !reduz && descendo && gReal >= 0.95 && y < servTopo - 2) pularParaServicos();
+    } else if (estadoVeu === 'sumindo' && y < chegada + (palcoFim - chegada) * 0.8) {
+      veu.classList.remove('some'); estadoVeu = 'livre';
+    }
 
     if ((camada ? y - palcoFim : passou) > vh * 1.4) {
       if (!escondido) { canvas.style.visibility = 'hidden'; escondido = true; }
@@ -281,7 +305,7 @@
 
     // luz: laterais acesas desde a abertura; acende forte no fim do giro
     var forca = 1 + 0.3 * faixa(g, 0.1, 0.35) + 2.4 * acende;
-    lado.emissiveIntensity = luz * (0.15 + 0.85 * Math.max(0, explode) + 0.5 * Math.max(0, forca - 1));
+    lado.emissiveIntensity = luz * (0.15 + 0.85 * Math.max(0, explode) + 0.4 * Math.max(0, forca - 1) + 2.2 * bordas);
     frente.emissiveIntensity = luz * 0.3 * acende;
     quente.intensity = luz * (0.2 + 0.4 * t + 2.2 * acende);
     renderer.toneMappingExposure = 1.05 + 0.12 * acende;
