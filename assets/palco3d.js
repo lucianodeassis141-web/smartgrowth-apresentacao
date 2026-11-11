@@ -141,7 +141,7 @@
 
     // texto do topo some enquanto o símbolo assume a tela
     if (texto) {
-      var op = Math.max(0, 1 - t * 1.7);
+      var op = Math.max(0, 1 - t * 2.8);
       if (Math.abs(op - ultimoTexto) > 0.01) { texto.style.opacity = op.toFixed(2); ultimoTexto = op; }
     }
 
