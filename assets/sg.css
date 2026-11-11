@@ -281,23 +281,20 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   .palco3d-canvas { height: 100lvh; }
 }
 
-/* celular: topo compacto para o G aparecer na primeira tela, como na RZD */
+/* celular: topo como o da RZD (barrinhas em cima, centralizado, botões na largura toda) */
 @media (max-width: 640px) {
-  .aviso-conceito { font-size: .6rem; padding: 6px 12px; letter-spacing: .1em; }
-  .aviso-conceito .longo { display: none; }
-  .topo .conteudo { height: 60px; }
-  .topo.aberto nav { top: 60px; }
-  .inicio .conteudo { min-height: 0; padding: 22px 0 40px; }
-  .inicio .olho { font-size: .6rem; letter-spacing: .14em; }
-  .inicio .olho .barras { display: none; }
-  .inicio h1 { margin-top: 12px; font-size: clamp(2.3rem, 11vw, 2.9rem); }
-  .inicio .apoio { margin-top: 12px; font-size: .95rem; line-height: 1.5; }
-  .inicio .bts { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .inicio .bts .bt { height: 48px; padding: 0 8px; font-size: .64rem; letter-spacing: .08em; gap: 6px; }
-  .inicio .bts .bt svg { width: 14px; height: 14px; }
-  .inicio .zap { margin-top: 6px; font-size: .85rem; }
-  .selos { margin-top: 12px; padding-top: 12px; gap: 6px 16px; font-size: .78rem; }
-  .inicio .lado-g { width: 70%; margin-top: 4px; }
+  .topo .conteudo { height: 64px; }
+  .topo.aberto nav { top: 64px; }
+  .inicio .conteudo { min-height: 0; padding: 40px 0 24px; }
+  .inicio .olho { flex-direction: column; gap: 12px; font-size: .62rem; letter-spacing: .14em; text-align: center; }
+  .inicio .olho .barras i { width: 7px; height: 14px; }
+  .inicio h1 { margin-top: 18px; font-size: clamp(2.2rem, 10.6vw, 2.9rem); }
+  .inicio .apoio { margin-top: 18px; font-size: 1rem; line-height: 1.6; }
+  .inicio .bts { margin-top: 28px; flex-direction: column; gap: 10px; }
+  .inicio .bts .bt { width: 100%; flex: none; height: 54px; }
+  .inicio .zap { margin-top: 10px; }
+  .selos { flex-direction: column; align-items: center; gap: 10px; margin-top: 24px; padding-top: 20px; font-size: .85rem; }
+  .inicio .lado-g { width: 74%; margin-top: 12px; }
 }
 [data-palco-texto] { will-change: opacity; }
 

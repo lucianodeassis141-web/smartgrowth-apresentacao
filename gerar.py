@@ -166,7 +166,6 @@ def cabeca(titulo, desc, raiz):
 <link rel="stylesheet" href="{raiz}assets/sg.css?v={v("sg.css")}">
 </head>
 <body>
-<div class="aviso-conceito">Apresentação<span class="longo"> · os projetos de marcas famosas são conceitos, sem vínculo com as marcas</span><span class="curto"> · marcas em conceito, sem vínculo</span></div>
 '''
 
 def topo(raiz, pagina):

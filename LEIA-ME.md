@@ -8,7 +8,7 @@ Para atualizar: `python gerar.py`, depois `git add -A && git commit -m ... && gi
 
 ## O que tem
 - `index.html`: topo com o **símbolo SG em 3D** (three.js). Ele desce do alto e acende como lâmpada quando a página abre. Ao rolar, vai para o meio da tela, gira, cresce e brilha em laranja (efeito do "R" da RZD). Sem WebGL, aparece o símbolo parado.
-  Depois de chegar no meio, o G fica na tela, gira 360 graus e brilha mais forte enquanto a pessoa rola, e só então sai (pedido do Luciano, 11/11).
+  Na pegada do R da RZD (11/11): frente prata (reflexo de um estúdio de luz) e laterais acesas em laranja; no meio, gira 360, as duas peças se afastam e voltam, acende forte e termina num clarão que vira a seção clara de Serviços. Se a pessoa para perto do fim, a página completa sozinha até Serviços. A faixa laranja de aviso no topo saiu; o selo "Conceito" segue em cada marca.
   No celular (11/11, na pegada da RZD): o G fica embaixo do texto e aparece na primeira tela, o texto some ao rolar, e o 3D é leve (resolução limitada, só desenha quando algo muda e ignora a barra do navegador).
   Depois vêm, nesta ordem: Serviços, Conceitos, Portfólio (esteira), Casos, A diferença, Como funciona, Sobre e Contato.
 - `profissionais/` e `negocios/`: páginas por público, como as da RZD.
