@@ -103,10 +103,12 @@
   }
 
   // medidas do palco, refeitas só quando a página muda de tamanho
-  var palcoFim = 1, alvoX = 0, alvoY = 0, alvoW = 0;
+  var chegada = 1, palcoFim = 1, alvoX = 0, alvoY = 0, alvoW = 0;
   function medirPalco() {
     var y = window.scrollY;
-    palcoFim = Math.max(1, palco.offsetTop + palco.offsetHeight / 2 - vh / 2);
+    // chegada: o símbolo no meio da tela; depois ele gira 360 e brilha até o fim do palco
+    chegada = Math.max(1, palco.offsetTop - vh * 0.15);
+    palcoFim = Math.max(chegada + 1, palco.offsetTop + palco.offsetHeight - vh);
     var r = alvo.getBoundingClientRect();
     alvoX = r.left + r.width / 2; alvoY = r.top + y + r.height / 2; alvoW = r.width;
     sujo = true;
@@ -128,7 +130,10 @@
     if (!abrindo && !flutuar && !sujo && y === ultimoY) return; // nada mudou: não desenha
     sujo = false; ultimoY = y;
 
-    var t = suave(y / palcoFim);
+    var t = suave(y / chegada);
+    var g = Math.min(1, Math.max(0, (y - chegada) / (palcoFim - chegada)));
+    var giro = g < 0.5 ? 4 * g * g * g : 1 - Math.pow(-2 * g + 2, 3) / 2; // entra e sai devagar
+    var forte = Math.sin(Math.PI * g); // brilho mais forte no meio do giro
     var passou = Math.max(0, y - palcoFim);
 
     if (passou > vh * 1.4) {
@@ -157,28 +162,28 @@
     var flutua = flutuar ? Math.sin(ms / 1400) * 0.04 * desce : 0;
 
     grupo.position.set(x, yy + flutua, 0);
-    grupo.scale.setScalar(lerp(larg0, larg1, t));
+    grupo.scale.setScalar(lerp(larg0, larg1, t) * (1 + 0.08 * forte));
     grupo.rotation.set(
       lerp(0.22, 0.32, t) + (1 - desce) * -0.6,
-      lerp(-0.42, 0.38, t) + (flutuar ? Math.sin(ms / 2600) * 0.05 * (1 - t) : 0),
+      lerp(-0.42, 0.38, t) + giro * Math.PI * 2 + (flutuar ? Math.sin(ms / 2600) * 0.05 * (1 - t) : 0),
       lerp(-0.05, -0.12, t)
     );
 
     var calor = t;
     frente.color.copy(corFrente0).lerp(corFrente1, calor);
     lado.color.copy(corLado0).lerp(corLado1, calor);
-    frente.emissiveIntensity = luz * (0.04 + calor * 0.32);
-    lado.emissiveIntensity = 0.15 + luz * (0.2 + calor * 0.3);
-    quente.intensity = luz * (0.5 + calor * 1.2);
-    renderer.toneMappingExposure = 0.95 + luz * 0.08 - calor * 0.08;
+    frente.emissiveIntensity = luz * (0.04 + calor * 0.32 + forte * 0.55);
+    lado.emissiveIntensity = 0.15 + luz * (0.2 + calor * 0.3 + forte * 0.5);
+    quente.intensity = luz * (0.5 + calor * 1.2 + forte * 2.5);
+    renderer.toneMappingExposure = 0.95 + luz * 0.08 - calor * 0.08 + forte * 0.12;
 
     if (brilho) {
       var bx = lerp(alvoX, vw / 2, t);
       var by = lerp(topoAlvo, vh / 2, t) - passou + (1 - desce) * -vh * 0.4;
-      var tam = lerp(alvoW * 1.9, Math.max(vw, vh) * 0.95, t);
+      var tam = lerp(alvoW * 1.9, Math.max(vw, vh) * 0.95, t) * (1 + 0.3 * forte);
       var s = tam / BRILHO_BASE;
       brilho.style.transform = 'translate3d(' + (bx - tam / 2).toFixed(1) + 'px,' + (by - tam / 2).toFixed(1) + 'px,0) scale(' + s.toFixed(4) + ')';
-      brilho.style.opacity = (luz * (0.55 + calor * 0.45)).toFixed(3);
+      brilho.style.opacity = Math.min(1, luz * (0.55 + calor * 0.45) * (1 + 0.6 * forte)).toFixed(3);
     }
 
     renderer.render(cena, camera);

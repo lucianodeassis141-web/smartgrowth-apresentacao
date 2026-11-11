@@ -95,7 +95,7 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   .inicio .lado-g { width: min(340px, 82%); margin: 28px auto 0; }
   .inicio .bts .bt { flex: 1 1 220px; }
 }
-.palco { height: 120vh; height: 120lvh; position: relative; z-index: 1; }
+.palco { height: 230vh; height: 230lvh; position: relative; z-index: 1; }
 .palco .frase { position: sticky; top: calc(100vh - 140px); text-align: center; font-size: .72rem; letter-spacing: .3em; text-transform: uppercase; color: rgba(243, 244, 248, .55); font-weight: 700; }
 
 /* seções */
@@ -276,7 +276,7 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   .topo { backdrop-filter: none; background: var(--tinta); }
   .esteira { mask-image: none; }
   .esteira .trilho { animation-duration: 45s; }
-  .palco { height: 100vh; height: 100lvh; }
+  .palco { height: 190vh; height: 190lvh; }
   .cartao::after { display: none; }
   .palco3d-canvas { height: 100lvh; }
 }
