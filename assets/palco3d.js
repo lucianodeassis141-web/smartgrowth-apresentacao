@@ -19,7 +19,6 @@
   try {
     renderer = new T.WebGLRenderer({ canvas: canvas, antialias: dpr < 1.5, alpha: true, powerPreference: movel ? 'default' : 'high-performance' });
   } catch (e) { return; }
-  document.documentElement.classList.add('tem-3d');
   renderer.setPixelRatio(dpr);
   renderer.outputEncoding = T.sRGBEncoding;
   renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -45,7 +44,7 @@
   }
   var geo = new T.ExtrudeGeometry(formas, {
     depth: 0.16, bevelEnabled: true, bevelThickness: 0.014, bevelSize: 0.009,
-    bevelSegments: movel ? 2 : 3, curveSegments: movel ? 14 : 24
+    bevelSegments: movel ? 2 : 3, curveSegments: movel ? 8 : 20
   });
   geo.center();
 
@@ -62,10 +61,22 @@
   var recorte = new T.DirectionalLight(0xff8a3d, 1.1); recorte.position.set(5, -2, -3); cena.add(recorte);
   var quente = new T.PointLight(0xff7a1a, 0, 9); quente.position.set(0, 0, 2.5); cena.add(quente);
 
+  // brilho desenhado dentro do 3D (como a RZD), em vez de um círculo gigante separado na página
+  var tela = document.createElement('canvas'); tela.width = tela.height = 256;
+  var cx2 = tela.getContext('2d'), grad = cx2.createRadialGradient(128, 128, 0, 128, 128, 128);
+  grad.addColorStop(0, 'rgba(255,130,40,0.75)'); grad.addColorStop(0.3, 'rgba(250,110,15,0.26)');
+  grad.addColorStop(0.62, 'rgba(250,119,21,0.05)'); grad.addColorStop(1, 'rgba(250,119,21,0)');
+  cx2.fillStyle = grad; cx2.fillRect(0, 0, 256, 256);
+  var texHalo = new T.CanvasTexture(tela); texHalo.encoding = T.sRGBEncoding;
+  var halo = new T.Sprite(new T.SpriteMaterial({ map: texHalo, toneMapped: false, transparent: true, depthWrite: false, opacity: 0 }));
+  halo.renderOrder = -1; halo.position.z = -0.8;
+  cena.add(halo);
+  if (brilho) brilho.style.display = 'none';
+
   /* ---- medidas ----
      No celular a barra do navegador muda a altura da tela o tempo todo. Só redimensiona
      quando a largura muda ou a altura muda muito (girar o aparelho). */
-  var vw = 0, vh = 0, mundoH = 0, BRILHO_BASE = 1000;
+  var vw = 0, vh = 0, mundoH = 0;
   function medir(forcar) {
     var nw = window.innerWidth, nh = window.innerHeight;
     if (!forcar && nw === vw && Math.abs(nh - vh) < 160) return;
@@ -114,9 +125,8 @@
     sujo = true;
   }
 
-  if (brilho) { brilho.style.width = brilho.style.height = BRILHO_BASE + 'px'; }
 
-  var sujo = true, ultimoY = -1, ultimoTexto = -1, escondido = false;
+  var sujo = true, ultimoY = -1, ultimoTexto = -1, escondido = false, yS = -1, tAnt = 0, pronto = false;
   window.addEventListener('scroll', function () { sujo = true; }, { passive: true });
   window.addEventListener('resize', function () { medir(false); medirPalco(); });
   window.addEventListener('load', function () { medirPalco(); });
@@ -127,11 +137,16 @@
     var abrindo = ms < FIM_ABERTURA;
     var y = window.scrollY;
     var flutuar = !movel && !reduz;
-    if (!abrindo && !flutuar && !sujo && y === ultimoY) return; // nada mudou: não desenha
+    // suavização (como a RZD): o símbolo alcança a rolagem aos poucos, sem repetir os solavancos do dedo
+    var dt = Math.min(64, Math.max(0, agora - tAnt)); tAnt = agora;
+    if (yS < 0 || Math.abs(y - yS) > vh * 2.5 || reduz) yS = y;
+    else { yS += (y - yS) * (1 - Math.exp(-dt / 90)); if (Math.abs(y - yS) < 0.5) yS = y; }
+    var alcancando = yS !== y;
+    if (!abrindo && !flutuar && !sujo && !alcancando && y === ultimoY) return; // nada mudou: não desenha
     sujo = false; ultimoY = y;
 
-    var t = suave(y / chegada);
-    var g = Math.min(1, Math.max(0, (y - chegada) / (palcoFim - chegada)));
+    var t = suave(yS / chegada);
+    var g = Math.min(1, Math.max(0, (yS - chegada) / (palcoFim - chegada)));
     var giro = g < 0.5 ? 4 * g * g * g : 1 - Math.pow(-2 * g + 2, 3) / 2; // entra e sai devagar
     var forte = Math.sin(Math.PI * g); // brilho mais forte no meio do giro
     var passou = Math.max(0, y - palcoFim);
@@ -177,16 +192,13 @@
     quente.intensity = luz * (0.5 + calor * 1.2 + forte * 2.5);
     renderer.toneMappingExposure = 0.95 + luz * 0.08 - calor * 0.08 + forte * 0.12;
 
-    if (brilho) {
-      var bx = lerp(alvoX, vw / 2, t);
-      var by = lerp(topoAlvo, vh / 2, t) - passou + (1 - desce) * -vh * 0.4;
-      var tam = lerp(alvoW * 1.9, Math.max(vw, vh) * 0.95, t) * (1 + 0.3 * forte);
-      var s = tam / BRILHO_BASE;
-      brilho.style.transform = 'translate3d(' + (bx - tam / 2).toFixed(1) + 'px,' + (by - tam / 2).toFixed(1) + 'px,0) scale(' + s.toFixed(4) + ')';
-      brilho.style.opacity = Math.min(1, luz * (0.55 + calor * 0.45) * (1 + 0.6 * forte)).toFixed(3);
-    }
+    var tamH = lerp(alvoW * 1.9, Math.max(vw, vh) * 0.95, t) * (1 + 0.3 * forte) * ini.k * 1.08;
+    halo.position.x = x; halo.position.y = yy + flutua;
+    halo.scale.set(tamH, tamH, 1);
+    halo.material.opacity = Math.min(1, luz * (0.55 + calor * 0.45) * (1 + 0.6 * forte));
 
     renderer.render(cena, camera);
+    if (!pronto) { pronto = true; document.documentElement.classList.add('tem-3d'); }
   }
 
   medir(true);

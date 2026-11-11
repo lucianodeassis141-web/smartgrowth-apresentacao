@@ -11,6 +11,13 @@
     itens.forEach(function (el) { io.observe(el); });
   } else { itens.forEach(function (el) { el.classList.add('visivel'); }); }
 
+  // esteira de prints: só anda quando está na tela
+  var esteira = document.querySelector('.esteira');
+  if (esteira && 'IntersectionObserver' in window) {
+    esteira.classList.add('parada');
+    new IntersectionObserver(function (es) { esteira.classList.toggle('parada', !es[0].isIntersecting); }).observe(esteira);
+  }
+
   // menu do celular
   var topo = document.querySelector('.topo'), bt = document.querySelector('.menu-bt');
   if (bt) {
